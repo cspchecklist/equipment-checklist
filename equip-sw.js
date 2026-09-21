@@ -3,7 +3,7 @@
 // Does NOT interfere with the Apps Script submission (POST requests
 // are never intercepted or cached).
 
-var CACHE_NAME = 'equipment-inspection-v1';
+var CACHE_NAME = 'equipment-inspection-v2';
 var APP_SHELL = [
   './index.html',
   './equip-manifest.json',
