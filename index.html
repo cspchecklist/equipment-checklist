@@ -1058,7 +1058,7 @@ function emailReport(data, blob, filename) {
 
   return blobToBase64(blob).then(pdfBase64 => {
     const payload = {
-      equipmentType: 'Reach Stacker',
+      equipmentType: 'Machine Equipment',
       date: formatDMY(data.inspectDate),
       time: data.inspectTime,
       operatorOrIncharge: data.faultReportedBy,
@@ -1427,15 +1427,40 @@ function buildInspectionPdfPages(data) {
   y += 27;
 
   // ================= Meta grid =================
-  const metaLabels = [['OPERATOR NAME', data.idName], ['DATE', formatDMY(data.inspectDate)], ['QC NO.', data.qcNo || '-'], ['RIDE TIME', data.rideTime]];
-  const boxW = (CONTENT_W - 24) / 4, boxH = 42;
-  metaLabels.forEach((m, i) => {
-    const x = MARGIN + i * (boxW + 8);
+  // Operator Name gets more room since it's the only free-text/variable-length
+  // field here; Date, QC No. and Ride Time are short, predictable values, so
+  // they don't need an equal quarter of the row.
+  const metaLabels = [
+    ['OPERATOR NAME', data.idName, 0.36],
+    ['DATE', formatDMY(data.inspectDate), 0.21],
+    ['QC NO.', data.qcNo || '-', 0.15],
+    ['RIDE TIME', data.rideTime, 0.28]
+  ];
+  const metaAvailW = CONTENT_W - 24; // total box width across the row, minus 3 gaps of 8pt
+  const boxH = 42;
+  let metaX = MARGIN;
+  metaLabels.forEach((m) => {
+    const boxW = metaAvailW * m[2];
+    const x = metaX;
     softShadow(x, y, boxW, boxH, 10);
     setFill([255, 255, 255]); setStroke(LGRAY); setLW(1);
     roundedRect(x, y, boxW, boxH, 10, 'B');
     textCenteredAt(x + boxW / 2, y + 16, 7.5, m[0], 'F1', GRAY);
-    textCenteredAt(x + boxW / 2, y + 33, 12, String(m[1]), 'F2', INK);
+    // Shrink long values to fit the box, and truncate as a last-resort
+    // fallback so text can never spill outside the box.
+    const valueText = String(m[1]);
+    const valMaxW = boxW - 12;
+    let valSize = 12;
+    while (valSize > 6.5 && measureText(valueText, valSize, 'F2') > valMaxW) valSize -= 0.5;
+    let displayText = valueText;
+    if (measureText(displayText, valSize, 'F2') > valMaxW) {
+      while (displayText.length > 1 && measureText(displayText + '...', valSize, 'F2') > valMaxW) {
+        displayText = displayText.slice(0, -1);
+      }
+      displayText += '...';
+    }
+    textCenteredAt(x + boxW / 2, y + 33, valSize, displayText, 'F2', INK);
+    metaX += boxW + 8;
   });
   y += boxH + 19;
 
