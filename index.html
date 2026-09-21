@@ -4,6 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>COSCO Daily Equipment Inspection - Machine Equipment / Quay Crane</title>
+
+<!-- PWA: installable, full-screen, home-screen icon -->
+<link rel="manifest" href="equip-manifest.json">
+<meta name="theme-color" content="#0B2540">
+<link rel="icon" type="image/png" href="equip-icon-192.png">
+<link rel="apple-touch-icon" href="equip-icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Equip Checklist">
+<meta name="mobile-web-app-capable" content="yes">
+
 <style>
 
   :root{
@@ -2000,6 +2011,16 @@ function changeEquipment() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('equip-sw.js').catch(function (err) {
+        console.error('Service worker registration failed:', err);
+      });
+    });
+  }
 </script>
 
 </body>
